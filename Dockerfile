@@ -3,7 +3,8 @@ FROM resin/rpi-raspbian:jessie
 
 ENV GO_VERSION=1.7.4
 ENV GO_OS=linux
-ENV GO_ARCH=amd64
+#ENV GO_ARCH=amd64
+ENV GO_ARCH=armv6l
 
 RUN useradd -ms /bin/bash security-agent && adduser security-agent dialout
 WORKDIR /home/security-agent
