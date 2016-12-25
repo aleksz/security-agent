@@ -11,6 +11,7 @@ WORKDIR /home/security-agent
 ENV PATH=$PATH:/usr/local/go/bin
 ADD . go/src/github.com/aleksz/security-agent/
 ENV GOPATH=/home/security-agent/go
+ENV CGO_ENABLED=0
 
 RUN apt-get update && \
 	apt-get install -y curl git gcc && \
