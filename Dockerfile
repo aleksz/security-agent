@@ -1,5 +1,5 @@
-#FROM resin/rpi-raspbian:jessie
-FROM debian:jessie
+FROM resin/rpi-raspbian:jessie
+#FROM debian:jessie
 
 ENV GO_VERSION=1.7.4
 ENV GO_OS=linux
