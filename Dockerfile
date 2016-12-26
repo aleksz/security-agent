@@ -5,14 +5,13 @@ ENV GO_VERSION=1.7.4
 ENV GO_OS=linux
 #ENV GO_ARCH=amd64
 ENV GO_ARCH=armv6l
+ENV CGO_ENABLED=0 #could not run go build witout it
+ENV PATH=$PATH:/usr/local/go/bin
+ENV GOPATH=/home/security-agent/go
 
 RUN useradd -ms /bin/bash security-agent && adduser security-agent dialout
 WORKDIR /home/security-agent
-ENV PATH=$PATH:/usr/local/go/bin
 ADD . go/src/github.com/aleksz/security-agent/
-ENV GOPATH=/home/security-agent/go
-ENV CGO_ENABLED=0
-VOLUME config.yml
 
 RUN apt-get update && \
 	apt-get install -y curl git gcc && \

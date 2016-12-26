@@ -8,6 +8,7 @@ import (
 	"time"
 	"io/ioutil"
 	"os"
+	"strconv"
 )
 
 var pingTimer *time.Timer
@@ -15,18 +16,19 @@ var config *Config
 
 type Config struct {
 	Serial struct {
-		device string
-		baud   int
+		Device string
+		Baud   int
 	}
 	SMTP struct {
-		host     string
-		port     int
-		user     string
-		password string
+		Host     string
+		Port     int
+		User     string
+		Password string
 	}
 }
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	config = parseConfig(os.Args[1:][0])
 	readSerial()
 }
@@ -45,6 +47,8 @@ func parseConfig(file string)  (*Config) {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
+
+	log.Println("Parsed config from " + file)
 
 	return &t
 }
@@ -69,7 +73,10 @@ func readSerial() {
 }
 
 func connectToSerial() *serial.Port {
-	c := &serial.Config{Name: config.Serial.device, Baud: config.Serial.baud}
+
+	log.Println("Will use serial port " + config.Serial.Device)
+
+	c := &serial.Config{Name: config.Serial.Device, Baud: config.Serial.Baud}
 
 	for {
 		s, err := serial.OpenPort(c)
@@ -106,27 +113,26 @@ func readCommandFromSerial(s *serial.Port) (string, error) {
 
 //TODO: guaranteed delivery
 func sendMail(command string) {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	c, err := smtp.Dial("smtp.gmail.com:587")
+	c, err := smtp.Dial(config.SMTP.Host + ":" + strconv.Itoa(config.SMTP.Port))
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	c.Verify("aleksandr.zhuikov@gmail.com")
+	c.Verify(config.SMTP.User)
 
 	// Set up authentication information.
-	auth := smtp.PlainAuth("", "aleksandr.zhuikov@gmail.com", "timwaxgbyfucdtsg", "smtp.gmail.com")
+	auth := smtp.PlainAuth("", config.SMTP.User, config.SMTP.Password, config.SMTP.Host)
 
 	// Connect to the server, authenticate, set the sender and recipient,
 	// and send the email all in one step.
-	to := []string{"aleksandr.zhuikov@gmail.com"}
+	to := []string{config.SMTP.User}
 
 	msg := []byte("Subject: [TEPEMOK] " + command + "\r\n" +
 		"\r\n" +
 		command)
-	err = smtp.SendMail("smtp.gmail.com:587", auth, "aleksandr.zhuikov@gmail.com", to, []byte(msg))
+	err = smtp.SendMail(config.SMTP.Host + ":" + strconv.Itoa(config.SMTP.Port), auth, config.SMTP.User, to, []byte(msg))
 }
 
 func handleCommand(command string) {
