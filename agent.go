@@ -1,28 +1,63 @@
 package main
 
 import (
+	"github.com/tarm/serial"
+	"gopkg.in/yaml.v2"
 	"log"
 	"net/smtp"
-	"github.com/tarm/serial"
 	"time"
+	"io/ioutil"
 )
 
 var pingTimer *time.Timer
+var config *Config
+
+type Config struct {
+	Serial struct {
+		device string
+		baud   int
+	}
+	SMTP struct {
+		host     string
+		port     int
+		user     string
+		password string
+	}
+}
 
 func main() {
+	config = parseConfig("/home/aleksz/projects/go/src/github.com/aleksz/security-agent/config.yml")
 	readSerial()
+}
+
+func parseConfig(file string)  (*Config) {
+
+	data, err := ioutil.ReadFile(file)
+
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+
+	t := Config{}
+	err = yaml.Unmarshal([]byte(data), &t)
+
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+
+	return &t
 }
 
 func readSerial() {
 
-	for ; ; {
+	for {
 		port := connectToSerial()
 
-		for ; ;  {
+		for {
 			command, err := readCommandFromSerial(port)
 			if err != nil {
 				log.Println(err.Error())
-				break;
+				break
 			} else {
 				handleCommand(command)
 			}
@@ -32,10 +67,10 @@ func readSerial() {
 	}
 }
 
-func connectToSerial() (*serial.Port) {
-	c := &serial.Config{Name: "/dev/ttyACM0", Baud: 9600}
+func connectToSerial() *serial.Port {
+	c := &serial.Config{Name: config.Serial.device, Baud: config.Serial.baud}
 
-	for ; ;  {
+	for {
 		s, err := serial.OpenPort(c)
 
 		if err != nil {
@@ -54,14 +89,14 @@ func connectToSerial() (*serial.Port) {
 func readCommandFromSerial(s *serial.Port) (string, error) {
 	command := make([]byte, 0)
 
-	for readLength := 0; readLength < 5 ;  {
+	for readLength := 0; readLength < 5; {
 
 		buf := make([]byte, 1)
 		n, err := s.Read(buf)
 		if err != nil {
 			return string(command[:]), err
 		}
-		readLength += n;
+		readLength += n
 		command = append(command, buf[:n]...)
 	}
 
@@ -69,7 +104,7 @@ func readCommandFromSerial(s *serial.Port) (string, error) {
 }
 
 //TODO: guaranteed delivery
-func sendMail(command string)  {
+func sendMail(command string) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	c, err := smtp.Dial("smtp.gmail.com:587")
@@ -111,7 +146,7 @@ func handleCommand(command string) {
 	}
 }
 
-func setPingTimer()  {
+func setPingTimer() {
 	pingTimer = time.NewTimer(time.Second * 5)
 	go func() {
 		<-pingTimer.C
@@ -120,6 +155,6 @@ func setPingTimer()  {
 	}()
 }
 
-func resetPingTime()  {
+func resetPingTime() {
 	pingTimer.Reset(time.Second * 5)
 }
