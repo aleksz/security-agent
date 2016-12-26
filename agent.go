@@ -7,6 +7,7 @@ import (
 	"net/smtp"
 	"time"
 	"io/ioutil"
+	"os"
 )
 
 var pingTimer *time.Timer
@@ -26,7 +27,7 @@ type Config struct {
 }
 
 func main() {
-	config = parseConfig("/home/aleksz/projects/go/src/github.com/aleksz/security-agent/config.yml")
+	config = parseConfig(os.Args[1:][0])
 	readSerial()
 }
 

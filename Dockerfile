@@ -12,6 +12,7 @@ ENV PATH=$PATH:/usr/local/go/bin
 ADD . go/src/github.com/aleksz/security-agent/
 ENV GOPATH=/home/security-agent/go
 ENV CGO_ENABLED=0
+VOLUME config.yml
 
 RUN apt-get update && \
 	apt-get install -y curl git gcc && \
@@ -29,4 +30,4 @@ RUN apt-get update && \
 	chown security-agent /home/security-agent
 
 USER security-agent
-ENTRYPOINT /home/security-agent/security-agent
+ENTRYPOINT ["/home/security-agent/security-agent", "/home/security-agent/config.yml"]
