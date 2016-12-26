@@ -24,6 +24,7 @@ type Config struct {
 		Port     int
 		User     string
 		Password string
+		From string
 	}
 }
 
@@ -132,7 +133,7 @@ func sendMail(command string) {
 	msg := []byte("Subject: [TEPEMOK] " + command + "\r\n" +
 		"\r\n" +
 		command)
-	err = smtp.SendMail(config.SMTP.Host + ":" + strconv.Itoa(config.SMTP.Port), auth, config.SMTP.User, to, []byte(msg))
+	err = smtp.SendMail(config.SMTP.Host + ":" + strconv.Itoa(config.SMTP.Port), auth, config.SMTP.From, to, []byte(msg))
 }
 
 func handleCommand(command string) {
