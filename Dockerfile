@@ -5,7 +5,7 @@ ENV GO_VERSION=1.7.4
 ENV GO_OS=linux
 #ENV GO_ARCH=amd64
 ENV GO_ARCH=armv6l
-ENV CGO_ENABLED=0 #could not run go build witout it
+ENV CGO_ENABLED=0
 ENV PATH=$PATH:/usr/local/go/bin
 ENV GOPATH=/home/security-agent/go
 
