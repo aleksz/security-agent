@@ -113,11 +113,6 @@ func readCommandFromSerial(s *serial.Port) (string, error) {
 }
 
 func isFullCommand(command []byte) (bool)  {
-
-	if (len(command) < 3) {
-		return false
-	}
-
 	return strings.HasSuffix(string(command), "\r\n")
 }
 
