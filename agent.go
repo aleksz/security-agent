@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var pingTimer *time.Timer
@@ -98,8 +99,7 @@ func connectToSerial() *serial.Port {
 func readCommandFromSerial(s *serial.Port) (string, error) {
 	command := make([]byte, 0)
 
-	for readLength := 0; readLength < 5; {
-
+	for readLength :=0; !isFullCommand(command); {
 		buf := make([]byte, 1)
 		n, err := s.Read(buf)
 		if err != nil {
@@ -109,7 +109,16 @@ func readCommandFromSerial(s *serial.Port) (string, error) {
 		command = append(command, buf[:n]...)
 	}
 
-	return string(command[:3]), nil
+	return string(command), nil
+}
+
+func isFullCommand(command []byte) (bool)  {
+
+	if (len(command) < 3) {
+		return false
+	}
+
+	return strings.HasSuffix(string(command), "\r\n")
 }
 
 //TODO: guaranteed delivery
@@ -143,12 +152,18 @@ func handleCommand(command string) {
 	case 'H':
 		resetPingTime()
 		log.Printf("ping")
-	case 'N':
+	case 'A':
 		sendMail("alarm raised " + command)
 		log.Printf("alarm raised " + command)
 	case 'Y':
 		sendMail("alarm resolved " + command)
 		log.Printf("alarm resolved " + command)
+	case 'C':
+		sendMail("wire cut " + command)
+		log.Printf("wire cut " + command)
+	case 'S':
+		sendMail("short circuit " + command)
+		log.Printf("short circuit " + command)
 	default:
 		log.Printf("Unknown command " + command)
 	}
