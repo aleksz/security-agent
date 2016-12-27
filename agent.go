@@ -32,6 +32,7 @@ type Config struct {
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	config = parseConfig(os.Args[1:][0])
+	setPingTimer()
 	readSerial()
 }
 
@@ -89,7 +90,6 @@ func connectToSerial() *serial.Port {
 			continue
 		} else {
 			log.Println("Connected")
-			setPingTimer()
 			s.Flush()
 			return s
 		}
