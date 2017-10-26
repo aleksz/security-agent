@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"github.com/melvinmt/firebase"
 )
 
 var pingTimer *time.Timer
@@ -30,6 +31,7 @@ type Config struct {
 }
 
 func main() {
+	sendToFirebase()
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	config = parseConfig(os.Args[1:][0])
 	setPingTimer()
@@ -146,6 +148,7 @@ func handleCommand(command string) {
 	switch []rune(command)[0] {
 	case 'H':
 		resetPingTime()
+		//TODO: reconcile sent alerts based on current state
 		log.Printf("ping")
 	case 'A':
 		sendMail("alarm raised " + command)
@@ -175,4 +178,37 @@ func setPingTimer() {
 
 func resetPingTime() {
 	pingTimer.Reset(time.Second * 5)
+}
+
+
+type PersonName struct {
+	First string
+	Last  string
+}
+
+type Person struct {
+	Name PersonName
+}
+
+func sendToFirebase()  {
+	var err error
+
+	url := "https://security-dcee1.firebaseio.com"
+
+	// Can also be your Firebase secret:
+	authToken := "AIzaSyCpOq343pPMff5dBq_rm1gGyfOelLGwLqE"
+
+	// Auth is optional:
+	ref := firebase.NewReference(url).Auth(authToken)
+
+	//// Create the value.
+	personName := PersonName{
+		First: "Fred",
+		Last:  "Swanson",
+	}
+
+	// Write the value to Firebase.
+	if err = ref.Write(personName); err != nil {
+		panic(err)
+	}
 }

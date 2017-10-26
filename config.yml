@@ -1,0 +1,10 @@
+serial:
+  device: /dev/ttyACM0
+  baud: 9600
+smtp:
+  host: smtp.gmail.com
+  port: 587
+  user: aleksandr.zhuikov@gmail.com
+  to: aleksandr.zhuikov@gmail.com
+  password: ftwhtipymriqzcjy
+  from: a@tw.ee
